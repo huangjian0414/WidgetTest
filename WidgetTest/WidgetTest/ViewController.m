@@ -12,6 +12,7 @@ static ViewController *vc = nil;
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *numberLabel;
 
+@property (nonatomic,assign)NSInteger number;
 @end
 
 @implementation ViewController
@@ -20,8 +21,10 @@ static ViewController *vc = nil;
     [super viewDidLoad];
     NSString *value=[self readDataFromNSUserDefaults];
     self.numberLabel.text=@"0";
+    self.number=0;
     if (value) {
         self.numberLabel.text=value;
+        self.number=[value integerValue];
     }
     vc=self;
     [self addObserver];
@@ -39,6 +42,7 @@ void observerMethod (CFNotificationCenterRef center, void *observer, CFStringRef
     NSString *value=[vc readDataFromNSUserDefaults];
     if (value) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            vc.number=[value integerValue];
             vc.numberLabel.text=value;
         });
     }
@@ -52,7 +56,12 @@ void observerMethod (CFNotificationCenterRef center, void *observer, CFStringRef
     CFNotificationCenterRef notification = CFNotificationCenterGetDarwinNotifyCenter ();
     CFNotificationCenterRemoveObserver(notification, (__bridge const void *)(self), CFSTR("widgetNoti"), NULL);
 }
-
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    self.number++;
+    self.numberLabel.text=[NSString stringWithFormat:@"%ld",self.number];
+    [self saveDataByNSUserDefaults:[NSString stringWithFormat:@"%ld",self.number]];
+}
 
 - (void)saveDataByNSUserDefaults:(NSString *)value
 {
